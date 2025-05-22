@@ -1,5 +1,14 @@
 import type { Metadata } from 'next';
+import { Roboto } from 'next/font/google';
 import './globals.css';
+import { Header } from '@/components/Header/Header';
+
+const roboto = Roboto({
+  variable: '--font-roboto',
+  subsets: ['latin'],
+  display: 'swap',
+  weight: ['400', '500', '700'],
+});
 
 export const metadata: Metadata = {
   title: 'Edgar Ivan Espinoza',
@@ -13,7 +22,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body className={`${roboto.variable} antialiased`}>
+        <main className="min-h-screen w-full bg-background">
+          <Header />
+          {children}
+        </main>
+      </body>
     </html>
   );
 }
