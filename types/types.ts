@@ -4,3 +4,8 @@ export type Product = {
   price: number;
   deliveryUrl: string;
 };
+
+export type RowData = {
+  id: string;
+  products: Product[];
+};
