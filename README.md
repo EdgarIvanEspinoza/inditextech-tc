@@ -33,13 +33,13 @@ Asegúrate de tener **Node.js** y **npm** instalados en tu máquina. Puedes desc
 1. Clona el repositorio del proyecto:
 
    ```bash
-   git clone https://github.com/tu-usuario/tu-repositorio.git
+   git clone https://github.com/EdgarIvanEspinoza/inditextech-tc.git
    ```
 
 2. Navega al directorio del proyecto:
 
    ```bash
-   cd tu-repositorio
+   cd inditextech-tc
    ```
 
 3. Instala las dependencias:
@@ -86,25 +86,4 @@ Asegúrate de tener **Node.js** y **npm** instalados en tu máquina. Puedes desc
 
 Puedes personalizar el estilo y las funcionalidades de este proyecto para adaptarlo a tus necesidades. Algunos de los parámetros que puedes ajustar:
 
-- **Tamaño máximo de productos por fila**: Actualmente está limitado a 3. Puedes cambiar esto en el hook `useEditorState` ajustando las condiciones en las funciones `addProductToRow` y `removeProduct`.
-- **Estilos**: Si deseas modificar los estilos, puedes hacerlo fácilmente mediante las clases de **Tailwind CSS**.
-
-## Contribuir
-
-Si deseas contribuir a este proyecto, siéntete libre de realizar un **fork** y crear un **pull request**. Asegúrate de que tus cambios no rompan la funcionalidad principal y agrega pruebas si es posible.
-
-### Pasos para contribuir
-
-1. Forkea el repositorio.
-2. Crea una nueva rama (`git checkout -b feature-nueva-caracteristica`).
-3. Realiza tus cambios y **commitea** (`git commit -am 'Agrega nueva característica'`).
-4. Sube tus cambios a tu fork (`git push origin feature-nueva-caracteristica`).
-5. Crea un pull request.
-
-## Licencia
-
-Este proyecto está bajo la **Licencia MIT**.
-
----
-
-¡Y eso es todo! Este README cubre los aspectos principales del proyecto. ¿Quieres agregar algo más, como un ejemplo visual o alguna funcionalidad extra que hayas implementado?
+- **Tamaño máximo de productos por fila**: Actualmente está limitado a 3.
