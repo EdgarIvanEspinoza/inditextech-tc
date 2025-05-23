@@ -20,7 +20,12 @@ export const DroppableRow = ({ rowId, products }: RowProps) => {
       }`}
     >
       {products.map((product) => (
-        <SortableProductCard key={product.id} product={product} />
+        <SortableProductCard
+          key={product.id}
+          product={product}
+          zoom={1}
+          disableDelete={false}
+        />
       ))}
     </div>
   );

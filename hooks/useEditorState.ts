@@ -23,7 +23,7 @@ export function useEditorState() {
     },
     {
       id: 'row-2',
-      products: WOMEN_PANTS_MOCK.slice(3, 6),
+      products: WOMEN_PANTS_MOCK.slice(3, 5),
       align: 'center',
     },
   ]);
