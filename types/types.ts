@@ -8,4 +8,5 @@ export type Product = {
 export type RowData = {
   id: string;
   products: Product[];
+  align: 'start' | 'center' | 'end';
 };
