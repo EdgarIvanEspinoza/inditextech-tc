@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Roboto } from 'next/font/google';
 import './globals.css';
 import { Header } from '@/components/Header/Header';
+import { TooltipProvider } from '@radix-ui/react-tooltip';
 
 const roboto = Roboto({
   variable: '--font-roboto',
@@ -24,8 +25,10 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${roboto.variable} antialiased`}>
         <main className="min-h-screen w-full bg-background">
-          <Header />
-          {children}
+          <TooltipProvider>
+            <Header />
+            {children}
+          </TooltipProvider>
         </main>
       </body>
     </html>

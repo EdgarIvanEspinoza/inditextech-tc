@@ -2,112 +2,72 @@
 
 import {
   DndContext,
+  DragEndEvent,
+  DragOverlay,
+  DragStartEvent,
   PointerSensor,
   useSensor,
   useSensors,
-  DragEndEvent,
-  DragStartEvent,
-  DragOverlay,
 } from '@dnd-kit/core';
 import {
   SortableContext,
-  arrayMove,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { useState } from 'react';
-import { WOMEN_PANTS_MOCK } from '@/mocks/mocks';
-import { Product, RowData } from '@/types/types';
 import { ProductCardOverlay } from '@/components/ProductCard/ProductCardOverlay';
-import { SortableRow } from '@/components/Row/SortableRow';
+import { Button } from '@/components/ui/button';
+import { useEditorState } from '@/hooks/useEditorState';
+import { SortableRow } from './Row/SortableRow';
+import { createRandomProduct } from '@/utils/createRandomProduct';
 
 export const Editor = () => {
-  const [rows, setRows] = useState<RowData[]>([
-    {
-      id: 'row-1',
-      products: WOMEN_PANTS_MOCK.slice(0, 3),
-      align: 'start',
-    },
-    {
-      id: 'row-2',
-      products: WOMEN_PANTS_MOCK.slice(3, 6),
-      align: 'center',
-    },
-    {
-      id: 'row-3',
-      products: WOMEN_PANTS_MOCK.slice(6, 10),
-      align: 'end',
-    },
-  ]);
-
-  const [activeProduct, setActiveProduct] = useState<Product | null>(null);
+  const {
+    rows,
+    addRow,
+    updateRowAlign,
+    moveProduct,
+    moveProductToRow,
+    reorderRows,
+    removeRow,
+    addProductToRow,
+    removeProduct,
+  } = useEditorState();
 
   const sensors = useSensors(useSensor(PointerSensor));
-  const isRowId = (id: import('@dnd-kit/core').UniqueIdentifier) =>
-    String(id).startsWith('row-');
+  const [activeProductId, setActiveProductId] = useState<string | null>(null);
+  const [zoom, setZoom] = useState(1);
+
+  const handleZoomIn = () =>
+    setZoom((z) => Math.min(Number(z.toFixed(2)) + 0.1, 1.5));
+  const handleZoomOut = () =>
+    setZoom((z) => Math.max(Number(z.toFixed(2)) - 0.1, 0.5));
+  const handleZoomReset = () => setZoom(1);
+
+  const activeProduct =
+    rows.flatMap((r) => r.products).find((p) => p.id === activeProductId) ||
+    null;
 
   const handleDragStart = (event: DragStartEvent) => {
-    const { active } = event;
-
-    const product = rows
-      .flatMap((row) => row.products)
-      .find((p) => p.id === active.id);
-
-    setActiveProduct(product ?? null);
+    setActiveProductId(event.active.id as string);
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
-    setActiveProduct(null);
 
-    if (!over || active.id === over.id) return;
-
-    if (isRowId(active.id) && isRowId(over.id)) {
-      const oldIndex = rows.findIndex((r) => r.id === active.id);
-      const newIndex = rows.findIndex((r) => r.id === over.id);
-      if (oldIndex !== -1 && newIndex !== -1) {
-        setRows(arrayMove(rows, oldIndex, newIndex));
-      }
+    if (!over || active.id === over.id) {
+      setActiveProductId(null);
       return;
     }
 
-    const activeId = active.id;
-    const overId = over.id;
+    const isRow = (id: string) => id.startsWith('row-');
 
-    const sourceRowIndex = rows.findIndex((row) =>
-      row.products.find((p) => p.id === activeId)
-    );
-
-    const sourceRow = rows[sourceRowIndex];
-    const activeIndex = sourceRow.products.findIndex((p) => p.id === activeId);
-
-    const updatedRows = [...rows];
-    const [movedItem] = updatedRows[sourceRowIndex].products.splice(
-      activeIndex,
-      1
-    );
-
-    // Si soltó sobre un producto
-    const destinationRowIndex = rows.findIndex((row) =>
-      row.products.find((p) => p.id === overId)
-    );
-
-    if (destinationRowIndex !== -1) {
-      const overIndex = rows[destinationRowIndex].products.findIndex(
-        (p) => p.id === overId
-      );
-      updatedRows[destinationRowIndex].products.splice(overIndex, 0, movedItem);
-    } else {
-      // Si soltó sobre la fila vacía
-      const rowTargetIndex = rows.findIndex((row) => row.id === overId);
-      if (rowTargetIndex !== -1) {
-        updatedRows[rowTargetIndex].products.push(movedItem);
-      } else {
-        // Fallback: volver al origen
-        updatedRows[sourceRowIndex].products.splice(activeIndex, 0, movedItem);
-      }
+    if (isRow(active.id as string) && isRow(over.id as string)) {
+      reorderRows(active.id as string, over.id as string);
+    } else if (!isRow(active.id as string) && !isRow(over.id as string)) {
+      moveProduct(active.id as string, over.id as string);
+    } else if (!isRow(active.id as string) && isRow(over.id as string)) {
+      moveProductToRow(active.id as string, over.id as string);
     }
-
-    setRows(updatedRows);
   };
 
   return (
@@ -116,29 +76,50 @@ export const Editor = () => {
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
     >
-      <SortableContext
-        items={rows.map((r) => r.id)}
-        strategy={verticalListSortingStrategy}
-      >
-        <div className="flex flex-col gap-4 p-8">
+      <div className="flex gap-2 items-center justify-end mb-4">
+        {zoom !== 1 && (
+          <Button variant="ghost" onClick={handleZoomReset} size="sm">
+            Reset
+          </Button>
+        )}
+        <Button variant="ghost" onClick={handleZoomOut} size="sm">
+          −
+        </Button>
+        <span className="text-sm w-12 text-center">
+          {Math.round(zoom * 100)}%
+        </span>
+        <Button variant="ghost" onClick={handleZoomIn} size="sm">
+          +
+        </Button>
+      </div>
+      <div className="p-6 space-y-6">
+        <div className="flex justify-end">
+          <Button onClick={addRow}>+ Añadir fila</Button>
+        </div>
+
+        <SortableContext
+          items={rows.map((r) => r.id)}
+          strategy={verticalListSortingStrategy}
+        >
           {rows.map((row) => (
             <SortableRow
               key={row.id}
               rowId={row.id}
               products={row.products}
               align={row.align}
-              onAlignChangeAction={(newAlign) => {
-                setRows((prev) =>
-                  prev.map((r) =>
-                    r.id === row.id ? { ...r, align: newAlign } : r
-                  )
-                );
+              onAlignChangeAction={(align) => updateRowAlign(row.id, align)}
+              onDelete={() => removeRow(row.id)}
+              onAddProduct={() => {
+                addProductToRow(row.id, createRandomProduct());
               }}
+              onRemoveProduct={(productId) => removeProduct(productId)}
+              zoom={zoom}
             />
           ))}
-        </div>
-      </SortableContext>
-      <DragOverlay>
+        </SortableContext>
+      </div>
+
+      <DragOverlay dropAnimation={{ duration: 150, easing: 'ease' }}>
         {activeProduct ? <ProductCardOverlay product={activeProduct} /> : null}
       </DragOverlay>
     </DndContext>

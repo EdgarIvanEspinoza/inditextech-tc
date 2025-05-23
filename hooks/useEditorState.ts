@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Product } from '@/types/types';
 import { v4 as uuid } from 'uuid';
 import { WOMEN_PANTS_MOCK } from '@/mocks/mocks';
+import { createRandomProduct } from '@/utils/createRandomProduct';
 
 export type Align = 'start' | 'center' | 'end';
 
@@ -25,15 +26,17 @@ export function useEditorState() {
       products: WOMEN_PANTS_MOCK.slice(3, 6),
       align: 'center',
     },
-    {
-      id: 'row-3',
-      products: WOMEN_PANTS_MOCK.slice(6, 10),
-      align: 'end',
-    },
   ]);
 
   const addRow = () => {
-    setRows((prev) => [...prev, { id: uuid(), products: [], align: 'center' }]);
+    setRows((prev) => [
+      ...prev,
+      {
+        id: `row-${uuid()}`,
+        products: [createRandomProduct()],
+        align: 'center',
+      },
+    ]);
   };
 
   const removeRow = (rowId: string) => {
@@ -45,21 +48,27 @@ export function useEditorState() {
   };
 
   const addProductToRow = (rowId: string, product: Product) => {
-    setRows((prev) =>
-      prev.map((r) =>
-        r.id === rowId && r.products.length < 3
-          ? { ...r, products: [...r.products, product] }
-          : r
-      )
-    );
+    setRows((prev) => {
+      const row = prev.find((r) => r.id === rowId);
+      if (!row || row.products.length >= 3) return prev;
+      return prev.map((r) =>
+        r.id === rowId ? { ...r, products: [...r.products, product] } : r
+      );
+    });
   };
 
   const removeProduct = (productId: string) => {
     setRows((prev) =>
-      prev.map((r) => ({
-        ...r,
-        products: r.products.filter((p) => p.id !== productId),
-      }))
+      prev.map((r) => {
+        if (r.products.length === 1 && r.products[0].id === productId) {
+          return r;
+        }
+
+        return {
+          ...r,
+          products: r.products.filter((p) => p.id !== productId),
+        };
+      })
     );
   };
 
@@ -74,6 +83,9 @@ export function useEditorState() {
     );
 
     if (sourceRowIndex === -1 || destinationRowIndex === -1) return;
+
+    if (rows[destinationRowIndex].products.length >= 3) return;
+    if (rows[sourceRowIndex].products.length === 1) return;
 
     const sourceRow = rows[sourceRowIndex];
     const destRow = rows[destinationRowIndex];
@@ -94,6 +106,8 @@ export function useEditorState() {
     const destRowIndex = rows.findIndex((row) => row.id === targetRowId);
 
     if (sourceRowIndex === -1 || destRowIndex === -1) return;
+    if (rows[sourceRowIndex].products.length === 1) return;
+    if (rows[destRowIndex].products.length >= 3) return;
 
     const updatedRows = [...rows];
     const sourceProducts = updatedRows[sourceRowIndex].products;

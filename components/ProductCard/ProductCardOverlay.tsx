@@ -9,7 +9,7 @@ type Props = {
 export function ProductCardOverlay({ product }: Props) {
   return (
     <Card className="w-[180px] h-[260px] opacity-80 pointer-events-none scale-105 shadow-xl">
-      <CardHeader className="p-0">
+      <CardHeader className="p-0 h-[70%]">
         <div className="relative w-full h-[150px]">
           <Image
             src={product.deliveryUrl}
@@ -20,7 +20,7 @@ export function ProductCardOverlay({ product }: Props) {
         </div>
       </CardHeader>
 
-      <CardContent className="px-4 py-2 text-center">
+      <CardContent className="px-4 py-2 text-center h-[30%]">
         <CardTitle className="text-sm font-medium truncate">
           {product.name}
         </CardTitle>

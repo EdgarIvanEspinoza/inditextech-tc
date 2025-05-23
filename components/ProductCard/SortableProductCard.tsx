@@ -5,9 +5,17 @@ import { Product } from '@/types/types';
 
 type Props = {
   product: Product;
+  onRemove?: (id: string) => void;
+  zoom: number;
+  disableDelete: boolean;
 };
 
-export const SortableProductCard = ({ product }: Props) => {
+export const SortableProductCard = ({
+  product,
+  onRemove,
+  zoom,
+  disableDelete,
+}: Props) => {
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({ id: product.id });
 
@@ -17,8 +25,10 @@ export const SortableProductCard = ({ product }: Props) => {
   };
 
   return (
-    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
-      <ProductCard product={product} />
+    <div ref={setNodeRef} style={style}>
+      <ProductCard
+        {...{ product, onRemove, attributes, listeners, zoom, disableDelete }}
+      />
     </div>
   );
 };
